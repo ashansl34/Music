@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Music Clone - Stream Your Favorites</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS RESET & GLOBAL STYLES */
+        :root {
+            --primary-red: #E50914;
+            --gradient-red: linear-gradient(90deg, #ff416c 0%, #ff4b2b 100%);
+            --dark-bg: #121212;
+            --dark-card: #1e1e1e;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --border-color: #2d2d2d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* UTILITY & LAYOUT */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 0;
+        }
+
+        .section {
+            padding: 6rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.8rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .btn-primary {
+            background: var(--gradient-red);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4);
+        }
+
+        /* HEADER & NAVIGATION */
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            position: absolute;
+            width: 90%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .main-nav .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-red);
+        }
+
+        /* HERO SECTION */
+        .hero {
+            background: var(--dark-bg);
+            padding: 10rem 0 6rem 0;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 2rem auto;
+        }
+        
+        /* THE MAIN APP INTERFACE */
+        #app-wrapper {
+            background-color: var(--dark-card);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        #app-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            font-weight: 600;
+            background: var(--gradient-red);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .search-container {
+            margin-bottom: 1.5rem;
+        }
+        
+        #search-bar {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        #app-main-content {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 2rem;
+        }
+
+        .video-suggestions, .favorites-section {
+            height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .section-heading {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .video-list {
+            list-style: none;
+        }
+
+        .video-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .video-item:hover {
+            background-color: #2a2a2a;
+            transform: translateX(5px);
+        }
+
+        .video-item.playing {
+            background-color: rgba(229, 9, 20, 0.2);
+            border-left: 3px solid var(--primary-red);
+        }
+
+        .video-item img {
+            width: 80px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 1rem;
+        }
+        
+        .video-info h4 { font-size: 0.9rem; margin-bottom: 2px; }
+        .video-info p { font-size: 0.8rem; color: var(--text-secondary); }
+
+        .player-container {
+            position: relative;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #video-player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .player-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .player-controls button {
+            background-color: var(--dark-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .player-controls button:hover {
+            color: var(--text-primary);
+            border-color: var(--primary-red);
+        }
+        
+        #add-to-favorites-btn {
+            background: var(--gradient-red);
+            color: white;
+            border: none;
+        }
+
+        .favorite-item-controls { margin-left: auto; }
+        .remove-favorite-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        .remove-favorite-btn:hover { color: var(--primary-red); }
+
+        /* AD PLACEHOLDERS */
+        .ad-placeholder {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--dark-card);
+            border: 1px dashed var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            margin: 2rem auto;
+        }
+        .ad-banner-top { height: 90px; width: 728px; max-width: 100%; }
+        .ad-banner-side { height: 250px; width: 300px; max-width: 100%; margin: 1rem auto;}
+        
+        /* OTHER SECTIONS (PROCESS, PRICING, FEATURES, FAQ) */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--dark-card);
+            padding: 2.5rem 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: var(--gradient-red);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .card p { color: var(--text-secondary); }
+
+        /* Pricing Card Specifics */
+        .pricing-card { text-align: center; }
+        .price { font-size: 3rem; font-weight: 700; margin: 1rem 0; }
+        .price span { font-size: 1rem; color: var(--text-secondary); font-weight: 400;}
+        .features-list { list-style: none; margin: 2rem 0; }
+        .features-list li { margin-bottom: 1rem; }
+
+        /* FAQ Section */
+        .faq-item {
+            background: var(--dark-card);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+        }
+        .faq-item summary {
+            padding: 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            outline: none;
+        }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-item summary::after {
+            content: '+';
+            position: absolute;
+            right: 1.5rem;
+            font-size: 1.5rem;
+            transition: transform 0.2s ease-in-out;
+        }
+        .faq-item[open] summary::after {
+            transform: rotate(45deg);
+        }
+        .faq-item .faq-content {
+            padding: 0 1.5rem 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        /* FOOTER */
+        .footer {
+            background-color: var(--dark-card);
+            padding: 4rem 5%;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+        }
+        .footer .logo { font-size: 1.5rem; font-weight: 700; color: var(--primary-red); margin-bottom: 1rem; }
+        .footer p { color: var(--text-secondary); }
+
+        /* RESPONSIVENESS */
+        @media (max-width: 992px) {
+            #app-main-content {
+                grid-template-columns: 1fr;
+            }
+            .video-suggestions, .favorites-section {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; }
+            .section { padding: 4rem 0; }
+            .section-title { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="main-nav">
+        <div class="logo">MusicStream</div>
+        <a href="#pricing" class="btn btn-primary">Get Started - It's Free</a>
+    </nav>
+
+    <!-- HERO & APP SECTION -->
+    <header class="hero">
+        <div class="container">
+            <h1 class="hero-title">Your Personal Music Universe</h1>
+            <p class="hero-subtitle">Search, play, and collect your favorite music videos. The ultimate ad-free experience, designed for you.</p>
+
+            <!-- AD PLACEHOLDER -->
+            <div class="ad-placeholder ad-banner-top">(Placeholder for 728x90 Google Ad Banner)</div>
+
+            <!-- THE APP -->
+            <div id="app-wrapper">
+                <h2 id="app-header">YouTube Music Clone</h2>
+                <div class="search-container">
+                    <input type="text" id="search-bar" placeholder="Search for a song or artist...">
+                </div>
+
+                <div id="app-main-content">
+                    <div class="video-player-column">
+                        <div class="player-container">
+                            <!-- MODIFIED: Added allow="picture-in-picture" -->
+                            <iframe id="video-player" src="https://www.youtube.com/embed/jfKfPfyJRdk?enablejsapi=1" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                        <div class="player-controls">
+                            <button id="play-btn">Play</button>
+                            <button id="pause-btn">Pause</button>
+                            <button id="fullscreen-btn">Fullscreen</button>
+                            <!-- ADDED: PiP Button -->
+                            <button id="pip-btn">PiP</button>
+                            <button id="add-to-favorites-btn">Add to Favorites</button>
+                        </div>
+                         <!-- AD PLACEHOLDER -->
+                        <div class="ad-placeholder ad-banner-side">(Placeholder for 300x250 Ad)</div>
+                    </div>
+                    
+                    <div class="video-list-column">
+                        <div class="video-suggestions">
+                            <h3 class="section-heading">Suggestions</h3>
+                            <ul id="video-suggestions-list" class="video-list">
+                                <!-- JS will populate this -->
+                            </ul>
+                        </div>
+                        <div class="favorites-section">
+                            <h3 class="section-heading">Your Favorites</h3>
+                            <ul id="favorites-list" class="video-list">
+                                <!-- JS will populate this from localStorage -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- PROCESS SECTION -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">A simple, intuitive process to enjoy your music.</p>
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="icon">🔍</div>
+                        <h3>1. Search</h3>
+                        <p>Use the search bar to find any song or artist from YouTube's vast library.</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon">▶️</div>
+                        <h3>2. Play</h3>
+                        <p>Click on any video from the suggestions to instantly play it in the embedded player.</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon">❤️</div>
+                        <h3>3. Favorite</h3>
+                        <p>Love a song? Add it to your personal favorites list for easy access next time.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURES SECTION -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Features You'll Love</h2>
+                <p class="section-subtitle">Everything you need for the perfect music experience.</p>
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3>Seamless Playback</h3>
+                        <p>Enjoy continuous music with our high-quality video player.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Local Storage</h3>
+                        <p>Your favorites are saved directly in your browser. No account needed.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Picture-in-Picture</h3>
+                        <p>Pop out the player to keep listening while you browse other sites.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Dark Mode</h3>
+                        <p>Easy on the eyes, perfect for late-night listening sessions.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Instant Search</h3>
+                        <p>Find what you're looking for in real-time with our live search filter.</p>
+                    </div>
+                    <div class="card">
+                        <h3>100% Free</h3>
+                        <p>All features are completely free to use, forever.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRICING SECTION -->
+        <section id="pricing" class="section">
+            <div class="container">
+                <h2 class="section-title">Pricing</h2>
+                <p class="section-subtitle">Get unlimited access to all features, completely free.</p>
+                <div class="cards-grid" style="justify-content: center;">
+                    <div class="card pricing-card" style="max-width: 400px;">
+                        <h3>Free Plan</h3>
+                        <div class="price">$0<span>/month</span></div>
+                        <ul class="features-list">
+                            <li>✔️ Unlimited Searches</li>
+                            <li>✔️ Unlimited Favorites</li>
+                            <li>✔️ Picture-in-Picture Mode</li>
+                            <li>✔️ Responsive on All Devices</li>
+                            <li>✔️ Community Support</li>
+                        </ul>
+                        <a href="#" class="btn btn-primary">Start Listening Now</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ SECTION -->
+        <section class="section">
+            <div class="container" style="max-width: 800px;">
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                <div class="faq-list">
+                    <details class="faq-item">
+                        <summary>Can I listen with my screen off?</summary>
+                        <div class="faq-content">
+                            <p>Unfortunately, no. Due to restrictions from mobile operating systems (iOS/Android) and YouTube's policies, audio cannot play from a browser when the screen is off. You can, however, use the Picture-in-Picture (PiP) button to keep the video playing in a small window while you use other apps or browse other sites.</p>
+                        </div>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Is this service really free?</summary>
+                        <div class="faq-content">
+                            <p>Yes, absolutely. This is a demonstration app and is 100% free to use. All features are available without any cost or subscription.</p>
+                        </div>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Where are my favorites stored?</summary>
+                        <div class="faq-content">
+                            <p>Your favorite videos are stored in your browser's `localStorage`. This means they are saved on your device and will be there when you return, but they won't sync across different computers or browsers.</p>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="logo">MusicStream</div>
+        <p>© 2024 MusicStream. A demonstration project. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- DATA ---
+            const dummyVideos = [
+                { id: 'jfKfPfyJRdk', title: 'lofi hip hop radio 📚 - beats to relax/study to', artist: 'Lofi Girl', thumbnail: 'https://i.ytimg.com/vi/jfKfPfyJRdk/hqdefault_live.jpg' },
+                { id: '5qap5aO4i9A', title: 'lofi hip hop radio 💤 - beats to sleep/chill to', artist: 'Lofi Girl', thumbnail: 'https://i.ytimg.com/vi/5qap5aO4i9A/hqdefault.jpg' },
+                { id: 'rUxyKA_-grg', title: 'synthwave radio 🌌 - beats to chill/game to', artist: 'Lofi Girl', thumbnail: 'https://i.ytimg.com/vi/rUxyKA_-grg/hqdefault.jpg' },
+                { id: 'M5QY2_8704o', title: 'Age of War', artist: 'Age of War Soundtrack', thumbnail: 'https://i.ytimg.com/vi/M5QY2_8704o/hqdefault.jpg' },
+                { id: 'DWcJFNfaw9c', title: 'Space Song', artist: 'Beach House', thumbnail: 'https://i.ytimg.com/vi/DWcJFNfaw9c/hqdefault.jpg' },
+                { id: '3od-kQMTZ9M', title: 'The Perfect Girl', artist: 'Mareux', thumbnail: 'https://i.ytimg.com/vi/3od-kQMTZ9M/hqdefault.jpg' },
+                { id: 'u9_m-T2z_uA', title: 'Pastel', artist: 'Plenka', thumbnail: 'https://i.ytimg.com/vi/u9_m-T2z_uA/hqdefault.jpg' },
+            ];
+
+            let currentVideo = { ...dummyVideos[0] };
+            let favorites = JSON.parse(localStorage.getItem('yt-music-favorites')) || [];
+
+            // --- DOM ELEMENTS ---
+            const searchBar = document.getElementById('search-bar');
+            const suggestionsList = document.getElementById('video-suggestions-list');
+            const favoritesList = document.getElementById('favorites-list');
+            const videoPlayer = document.getElementById('video-player');
+            const addToFavoritesBtn = document.getElementById('add-to-favorites-btn');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const playBtn = document.getElementById('play-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const pipBtn = document.getElementById('pip-btn'); // ADDED
+
+            // --- YOUTUBE IFRAME API ---
+            let ytPlayer;
+            window.onYouTubeIframeAPIReady = function() {
+                ytPlayer = new YT.Player('video-player', {
+                    events: { 'onReady': onPlayerReady }
+                });
+            };
+
+            function onPlayerReady(event) { /* Player is ready */ }
+
+            // --- RENDER FUNCTIONS ---
+            const renderVideos = (videos, listElement, isFavoritesList = false) => {
+                listElement.innerHTML = '';
+                 if(videos.length === 0 && isFavoritesList) {
+                    listElement.innerHTML = `<p style="padding: 1rem; color: var(--text-secondary);">No favorites yet. Click 'Add to Favorites' to save a song!</p>`;
+                    return;
+                }
+                 if(videos.length === 0 && !isFavoritesList) {
+                    listElement.innerHTML = `<p style="padding: 1rem; color: var(--text-secondary);">No results found.</p>`;
+                    return;
+                }
+
+                videos.forEach(video => {
+                    const li = document.createElement('li');
+                    li.classList.add('video-item');
+                    li.dataset.videoId = video.id;
+                    li.innerHTML = `
+                        <img src="${video.thumbnail}" alt="${video.title}">
+                        <div class="video-info">
+                            <h4>${video.title}</h4>
+                            <p>${video.artist}</p>
+                        </div>
+                        ${isFavoritesList ? `<div class="favorite-item-controls"><button class="remove-favorite-btn" data-id="${video.id}">×</button></div>` : ''}
+                    `;
+                    listElement.appendChild(li);
+                });
+            };
+
+            // --- CORE FUNCTIONS ---
+            const playVideo = (video) => {
+                currentVideo = video;
+                if(ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+                    ytPlayer.loadVideoById(video.id);
+                } else {
+                    videoPlayer.src = `https://www.youtube.com/embed/${video.id}?enablejsapi=1`;
+                }
+                document.querySelectorAll('.video-item').forEach(item => {
+                    item.classList.remove('playing');
+                    if(item.dataset.videoId === video.id) {
+                        item.classList.add('playing');
+                    }
+                });
+            };
+            
+            const updateFavorites = () => {
+                localStorage.setItem('yt-music-favorites', JSON.stringify(favorites));
+                renderVideos(favorites, favoritesList, true);
+            };
+
+            // --- EVENT LISTENERS ---
+            searchBar.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredVideos = dummyVideos.filter(video => 
+                    video.title.toLowerCase().includes(searchTerm) || 
+                    video.artist.toLowerCase().includes(searchTerm)
+                );
+                renderVideos(filteredVideos, suggestionsList);
+            });
+
+            suggestionsList.addEventListener('click', (e) => {
+                const videoItem = e.target.closest('.video-item');
+                if (videoItem) {
+                    const videoId = videoItem.dataset.videoId;
+                    const video = dummyVideos.find(v => v.id === videoId);
+                    if (video) playVideo(video);
+                }
+            });
+            
+            favoritesList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-favorite-btn')) {
+                    const videoId = e.target.dataset.id;
+                    favorites = favorites.filter(fav => fav.id !== videoId);
+                    updateFavorites();
+                } else {
+                    const videoItem = e.target.closest('.video-item');
+                    if (videoItem) {
+                        const videoId = videoItem.dataset.videoId;
+                        const video = favorites.find(v => v.id === videoId);
+                        if (video) playVideo(video);
+                    }
+                }
+            });
+
+            addToFavoritesBtn.addEventListener('click', () => {
+                if (currentVideo && !favorites.some(fav => fav.id === currentVideo.id)) {
+                    favorites.push(currentVideo);
+                    updateFavorites();
+                }
+            });
+            
+            fullscreenBtn.addEventListener('click', () => {
+                const playerContainer = document.querySelector('.player-container');
+                if (playerContainer.requestFullscreen) {
+                    playerContainer.requestFullscreen();
+                }
+            });
+            
+            playBtn.addEventListener('click', () => {
+                if (ytPlayer && typeof ytPlayer.playVideo === 'function') ytPlayer.playVideo();
+            });
+
+            pauseBtn.addEventListener('click', () => {
+                if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
+            });
+
+            // ADDED: Picture-in-Picture event listener
+            pipBtn.addEventListener('click', async () => {
+                if (document.pictureInPictureEnabled && !videoPlayer.disablePictureInPicture) {
+                    try {
+                        if (document.pictureInPictureElement) {
+                            await document.exitPictureInPicture();
+                        } else {
+                            // Note: Requesting PiP on an iframe is a browser-handled feature.
+                            // This programmatic request might not work on all browsers for iframes.
+                            // The `allow="picture-in-picture"` attribute is the most important part.
+                            // Often, the user must right-click the video to activate it.
+                            // This button serves as a clear indicator that the feature is intended.
+                            await videoPlayer.requestPictureInPicture();
+                        }
+                    } catch (error) {
+                        console.error('PiP Error:', error);
+                        alert('Picture-in-Picture failed. Try right-clicking the video player.');
+                    }
+                } else {
+                    alert('Picture-in-Picture is not supported or is disabled on your browser.');
+                }
+            });
+
+            // --- INITIALIZATION ---
+            renderVideos(dummyVideos, suggestionsList);
+            updateFavorites();
+            if (currentVideo) {
+                 playVideo(currentVideo); 
+            }
+        });
+    </script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+</body>
+  </html>
